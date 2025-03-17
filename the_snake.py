@@ -1,4 +1,4 @@
-from random import choice, randint
+from random import choice  # , randint
 
 import pygame
 
@@ -40,17 +40,77 @@ clock = pygame.time.Clock()
 
 
 # Тут опишите все классы игры.
-...
+class GameObject:
+    """Базовый класс, от которого наследуются другие игровые объекты."""
+
+    def __init__(self) -> None:
+        self.position: tuple = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
+        self.body_color: tuple | None = None
+
+    def draw(self) -> None:
+        """Абстрактный метод для отрисовки объекта на игровом поле."""
+        pass
+
+
+class Apple(GameObject):
+    """Класс, описывающий яблоко."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.body_color: tuple = APPLE_COLOR
+        self.randomize_position()
+
+    def randomize_position(self) -> None:
+        """Устанавливает случайное положение яблока на игровом поле."""
+        random_width = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
+        random_height = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
+        self.position = (random_width, random_height)
+
+    def draw(self) -> None:
+        """Отрисовка яблока на игровом поле."""
+        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+
+class Snake(GameObject):
+    """Класс, описывающий змейку."""
+
+    pass
+
+
+def handle_keys(game_object) -> None:
+    """Функция обработки нажатий клавиш пользователем."""
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            raise SystemExit
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP and game_object.direction != DOWN:
+                game_object.next_direction = UP
+            elif event.key == pygame.K_DOWN and game_object.direction != UP:
+                game_object.next_direction = DOWN
+            elif event.key == pygame.K_LEFT and game_object.direction != RIGHT:
+                game_object.next_direction = LEFT
+            elif event.key == pygame.K_RIGHT and game_object.direction != LEFT:
+                game_object.next_direction = RIGHT
 
 
 def main():
+    """Основной игровой цикл."""
     # Инициализация PyGame:
     pygame.init()
     # Тут нужно создать экземпляры классов.
-    ...
+    apple = Apple()
 
-    # while True:
-    #     clock.tick(SPEED)
+    while True:
+        clock.tick(SPEED)
+        handle_keys(apple)
+
+        apple.randomize_position()
+        apple.draw()
+
+        pygame.display.update()
 
         # Тут опишите основную логику игры.
         # ...
@@ -59,12 +119,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-
-# Метод draw класса Apple
-# def draw(self):
-#     rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-#     pygame.draw.rect(screen, self.body_color, rect)
-#     pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 # # Метод draw класса Snake
 # def draw(self):
@@ -83,21 +137,6 @@ if __name__ == '__main__':
 #         last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
 #         pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
-# Функция обработки действий пользователя
-# def handle_keys(game_object):
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             pygame.quit()
-#             raise SystemExit
-#         elif event.type == pygame.KEYDOWN:
-#             if event.key == pygame.K_UP and game_object.direction != DOWN:
-#                 game_object.next_direction = UP
-#             elif event.key == pygame.K_DOWN and game_object.direction != UP:
-#                 game_object.next_direction = DOWN
-#             elif event.key == pygame.K_LEFT and game_object.direction != RIGHT:
-#                 game_object.next_direction = LEFT
-#             elif event.key == pygame.K_RIGHT and game_object.direction != LEFT:
-#                 game_object.next_direction = RIGHT
 
 # Метод обновления направления после нажатия на кнопку
 # def update_direction(self):
