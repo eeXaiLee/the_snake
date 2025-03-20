@@ -2,20 +2,16 @@ from random import choice
 
 import pygame
 
-# Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
-# Направления движения:
 UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-# Ключ — код клавиши,
-# значение — кортеж (новое направление, запрещённое направление)
 DIRECTION_CHANGE = {
     pygame.K_UP: (UP, DOWN),
     pygame.K_DOWN: (DOWN, UP),
@@ -44,10 +40,8 @@ class GameObject:
     """Базовый тип объектов, используемых в игре."""
 
     def __init__(self) -> None:
-        self.position: tuple[int, int] = (
-            (SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2)
-        )
-        self.body_color: tuple[int, int, int] = (0, 0, 0)
+        self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
+        self.body_color = (0, 0, 0)
 
     def draw_cell(
             self,
@@ -109,9 +103,9 @@ class Snake(GameObject):
 
     def __init__(self, color: tuple[int, int, int] = SNAKE_COLOR) -> None:
         super().__init__()
-        self.reset()  # Инициализируем length, positions, direction
-        self.body_color: tuple[int, int, int] = color
-        self.last: tuple | None = None
+        self.reset()
+        self.body_color = color
+        self.last = (-1, -1)
 
     def update_direction(
             self,
@@ -121,7 +115,7 @@ class Snake(GameObject):
         if next_direction:
             self.direction = next_direction
 
-    def move(self):
+    def move(self) -> None:
         """Перемещает змейку в соответствии с текущим направлением."""
         head_x, head_y = self.get_head_position()
         dx, dy = self.direction
@@ -133,22 +127,26 @@ class Snake(GameObject):
         if len(self.positions) > self.length + 1:
             self.last = self.positions.pop()
         else:
-            self.last = None
+            self.last = (-1, -1)
 
     def draw(self) -> None:
-        """Отрисовывает змейку, стирая след от предыдущего положения."""
-        # Отрисовка тела
+        """Отрисовывает тело и голову змейки,
+        затирая след от предыдущего положения.
+        """
         for position in self.positions[:-1]:
             self.draw_cell(position, self.body_color)
 
-        # Отрисовка головы
-        self.draw_cell(self.get_head_position(), self.body_color)
+        self.draw_cell(
+            self.get_head_position(),
+            self.body_color
+        )
 
-        # Затирание последнего сегмента
-        if self.last:
-            self.draw_cell(self.last, BOARD_BACKGROUND_COLOR, False)
+        if self.last != (-1, -1):
+            self.draw_cell(self.last,
+                           BOARD_BACKGROUND_COLOR,
+                           False)
 
-    def get_head_position(self) -> tuple:
+    def get_head_position(self) -> tuple[int, int]:
         """Возвращает позицию головы змейки."""
         head_x, head_y = self.positions[0]
         return head_x, head_y
@@ -164,7 +162,7 @@ class GameExit(Exception):
     """Завершение игры."""
 
 
-def handle_keys(game_object: 'Snake') -> None:
+def handle_keys(game_object: 'Snake') -> tuple | None:
     """Обрабатывает нажатия клавиш для управления змейкой."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -177,10 +175,11 @@ def handle_keys(game_object: 'Snake') -> None:
             if directions:
                 next_direction, forbidden_direction = directions
                 if current_direction != forbidden_direction:
-                    game_object.direction = next_direction
+                    return next_direction
+    return None
 
 
-def main():
+def main() -> None:
     """Основной игровой цикл."""
     pygame.init()
 
