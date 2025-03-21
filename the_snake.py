@@ -237,33 +237,32 @@ def main() -> None:
     apple = Apple()
     snake = Snake()
 
-    try:
-        while True:
-            clock.tick(SPEED)
+    while True:
+        clock.tick(SPEED)
 
-            try:
-                next_direction = handle_keys(snake)
-            except GameExit:
-                sys.exit('Игра завершена пользователем.')
-            snake.update_direction(next_direction)
-            snake.move()
+        try:
+            next_direction = handle_keys(snake)
+        except GameExit:
+            pygame.quit()
+            sys.exit('Игра завершена пользователем.')
 
-            head_position = snake.get_head_position()
-            if head_position == apple.position:
-                snake.length += 1
-                apple.randomize_position(snake.positions)
+        snake.update_direction(next_direction)
+        snake.move()
 
-            if head_position in snake.positions[1:]:
-                snake.reset()
-                apple.randomize_position(snake.positions)
+        head_position = snake.get_head_position()
+        if head_position == apple.position:
+            snake.length += 1
+            apple.randomize_position(snake.positions)
 
-            screen.fill(BOARD_BACKGROUND_COLOR)
-            apple.draw()
-            snake.draw()
+        if head_position in snake.positions[1:]:
+            snake.reset()
+            apple.randomize_position(snake.positions)
 
-            pygame.display.update()
-    finally:
-        pygame.quit()
+        screen.fill(BOARD_BACKGROUND_COLOR)
+        apple.draw()
+        snake.draw()
+
+        pygame.display.update()
 
 
 if __name__ == '__main__':
